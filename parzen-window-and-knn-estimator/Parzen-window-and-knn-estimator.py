@@ -29,7 +29,7 @@ class ParzenWindow:
 
 
     #Parzen window density estimation, with gaussian kernel
-    def kernel_density(self, bandwidth: float, kernel: str ='gaussian') -> KernelDensity:
+    def fit(self, bandwidth: float, kernel: str ='gaussian') -> KernelDensity:
         """
         Fit a kernel density model using the Parzen window method.
 
@@ -66,7 +66,7 @@ class ParzenWindow:
         pdf_values : ndarray
             Array of estimated probability density values.
         """
-        pwde = self.kernel_density(bandwidth=bandwidth)
+        pwde = self.fit(bandwidth=bandwidth)
         points = np.linspace(-10, 10, points_num)
         pdf_values = np.exp(pwde.score_samples(points.reshape(-1,1)))
         return pdf_values
