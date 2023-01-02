@@ -3,7 +3,7 @@ The pdf of a random variable is given by:
 $$
 p(x)=
 \begin{cases}
-1/2 & \quad 0<x<2\\ 
+1/2 & \quad \text{$0<x<2$}\\ 
 0 & \quad \text{otherwise}
 \end{cases}
 $$
