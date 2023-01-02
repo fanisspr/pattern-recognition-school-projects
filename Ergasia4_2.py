@@ -4,17 +4,35 @@ from sklearn import metrics
 from sklearn.neighbors import KernelDensity
 
 
-#Knn classifier algorithm
 def knn_classify(k, test_samples, train_samples, train_labels):
+    """
+    Classify test samples using the k-nearest neighbors (KNN) algorithm.
+
+    Parameters
+    ----------
+    k : int
+        The number of nearest neighbors to consider when making a prediction.
+    test_samples : ndarray
+        The test samples.
+    train_samples : ndarray
+        The training samples.
+    train_labels : list
+        The labels for the training samples.
+
+    Returns
+    -------
+    class_predictions : list
+        A list of class predictions, one for each test sample.
+    """
     class_predictions = []
     for test_samp in test_samples:
-         distances = np.abs(train_samples - test_samp)  #for higher Dims: np.sum(() ** 2, axis=1) #Euclidean Distance = sqrt(sum i to N (x1_i – x2_i)^2)
+         distances = np.abs(train_samples - test_samp)  #for higher Dims: np.sum(() ** 2, axis=1)
          retrieved_ids = np.argsort(distances)
          retrieved_ids = retrieved_ids[:k]
 
          neighbors_class = [train_labels[id] for id in retrieved_ids]
          prediction = max(set(neighbors_class), key= neighbors_class.count)
-         class_predictions.append(prediction) # Make a classification prediction with neighbors
+         class_predictions.append(prediction)
 
     return class_predictions
 
@@ -56,14 +74,14 @@ class ParzenWindow:
 
 
     #Evaluate the log density model on the points.
-    def estimate(self, points_num: int, bandwidth: float) -> np.ndarray:
+    def estimate(self, data: int, bandwidth: float) -> np.ndarray:
         """
         Estimate the probability density of the data using the kernel density model.
 
         Parameters
         ----------
-        points_num : int
-            Number of points to use for estimating the density.
+        data : int
+            data to use for estimating the density.
         bandwidth : float
             Bandwidth of the kernel.
 
@@ -73,8 +91,7 @@ class ParzenWindow:
             Array of estimated probability density values.
         """
         pwde = self.fit(bandwidth=bandwidth)
-        points = np.linspace(-10, 10, points_num)
-        pdf_values = np.exp(pwde.score_samples(points.reshape(-1,1)))
+        pdf_values = np.exp(pwde.score_samples(data.reshape(-1,1)))
         return pdf_values
         
 
@@ -107,25 +124,23 @@ class ParzenWindow:
                 xlabel='x',
                 ylabel='pdf')
 
-#Classify with parzen windows
-def Parsen_classify(test_samples, dx1, dx2, dx3, p, h):
-    # likelihood = ParsenWindow(train_samples,test_samples,h)
-    likelihood1 = ParsenWindow(dx1, test_samples, h)
-    likelihood2 = ParsenWindow(dx2, test_samples, h)
-    likelihood3 = ParsenWindow(dx3, test_samples, h)
-    predictions = []
-    for i in range(0, Ny):
-        post_p1 = likelihood1[i] * p[0]
-        post_p2 = likelihood2[i] * p[1]
-        post_p3 = likelihood3[i] * p[2]
-        prediction = max(post_p1,post_p2,post_p3)
-        if (prediction == post_p1):
-            predictions.append(1)
-        elif(prediction == post_p2):
-            predictions.append(2)
-        else: predictions.append(3)
+    #Classify with parzen windows
+    @staticmethod
+    def classify(priors: list[float], *likelihoods):
+        # likelihood = ParsenWindow(train_samples,test_samples,h)
+        predictions = []
+        for i in range(0, len(likelihoods[0])):
+            post_p1 = likelihoods[0][i] * priors[0]
+            post_p2 = likelihood2[1][i] * priors[1]
+            post_p3 = likelihood3[2][i] * priors[2]
+            prediction = max(post_p1,post_p2,post_p3)
+            if (prediction == post_p1):
+                predictions.append(1)
+            elif(prediction == post_p2):
+                predictions.append(2)
+            else: predictions.append(3)
 
-    return predictions
+        return predictions
 
 #Train the Pnn model
 def Pnn_train(X,y):
@@ -180,7 +195,7 @@ def Pnn_classify(X, w, a, h):
 
     return predictions
 
-#Classification accuracy
+
 def classification_accuracy(predictions, test_labels):
     correct = 0
     for i in range(len(test_labels)):
@@ -249,8 +264,8 @@ test_labels = create_labels(Ny1, Ny2, Ny3)
 
 
 '''
-Classify test samples using knn algorithm, for k=1,2,3, and calculate error.
-Compare error to that of the Bayesian classifier.
+- Classify test samples using knn algorithm, for k=1,2,3, and calculate error.
+- Compare error to that of the Bayesian classifier.
 '''
 
 
@@ -295,9 +310,15 @@ and choose the one with the best results
 '''
 
 # Classify with Parzen window
+pw1 = ParzenWindow(dx1)
+pw2 = ParzenWindow(dx2)
+pw3 = ParzenWindow(dx3)
 for h in [0.02, 0.1, 0.5, 1, 4]:
-    parsen_classes = Parsen_classify(test_samples, dx1, dx2, dx3, p, h)
-    acc = classification_accuracy(parsen_classes, test_labels)
+    likelihood1 = pw1.estimate(test_samples, h)
+    likelihood2 = pw2.estimate(test_samples, h)
+    likelihood3 = pw3.estimate(test_samples, h)
+    parzen_classes = ParzenWindow.classify(p, likelihood1, likelihood2, likelihood3)
+    acc = classification_accuracy(parzen_classes, test_labels)
     print("Parsen accuracy, for h= "+str(h)+": ", acc)
 
 
@@ -305,8 +326,11 @@ for h in [0.02, 0.1, 0.5, 1, 4]:
 results = []
 for i in range(1,100):
     h = 0.01 * i
-    parsen_classes = Parsen_classify(test_samples, dx1, dx2, dx3, p, h)
-    acc = classification_accuracy(parsen_classes, test_labels)
+    likelihood1 = pw1.estimate(test_samples, h)
+    likelihood2 = pw2.estimate(test_samples, h)
+    likelihood3 = pw3.estimate(test_samples, h)
+    parzen_classes = ParzenWindow.classify(p, likelihood1, likelihood2, likelihood3)
+    acc = classification_accuracy(parzen_classes, test_labels)
     results.append(acc)
 best_h = max(results)
 best_h_ind = 0.01 * results.index(best_h)
