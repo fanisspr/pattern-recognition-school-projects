@@ -1,12 +1,6 @@
 # Parzen window and Knn estimators
 The pdf of a random variable is given by: 
-$$
-p(x)=
-\begin{cases}
-1/2 & \quad \text{$0<x<2$}\\ 
-0 & \quad \text{otherwise}
-\end{cases}
-$$
+$$ p(x)= \begin{cases} \frac{1}{2} & \quad \text{$0<x<2$}\\ 0 & \quad \text{otherwise} \end{cases} $$
 
 The pdf is estimated using the Parzen window and Knn estimators.
 - Parzen window estimate uses a gaussian kernel, bandwidth of 0.05 and 0.2, 
