@@ -1,11 +1,11 @@
 import numpy as np
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
-from sklearn.neighbors import KernelDensity as kd
+from sklearn.neighbors import KernelDensity
 
 
 #Knn classifier algorithm
-def Knn(k, test_samples, train_samples, train_labels):
+def knn_classify(k, test_samples, train_samples, train_labels):
     class_predictions = []
     for test_samp in test_samples:
          distances = np.abs(train_samples - test_samp)  #for higher Dims: np.sum(() ** 2, axis=1) #Euclidean Distance = sqrt(sum i to N (x1_i – x2_i)^2)
@@ -19,14 +19,93 @@ def Knn(k, test_samples, train_samples, train_labels):
     return class_predictions
 
 #Create pdf with parsen window
-def ParsenWindow(X, y, h):
-    #Parsen window density estimation
-    pwde = kd(kernel='gaussian', bandwidth = h).fit(X.reshape(-1,1))
+class ParzenWindow: 
+    """
+    A class for estimating the probability density of a 1D dataset 
+    using the Parzen window method.
 
-    #Evaluate the log density model on the data.
-    pdf_vals = np.exp(pwde.score_samples(y.reshape(-1,1)))
+    Parameters
+    ----------
+    data : ndarray
+        1D array of data points.
+    """
+    
+    def __init__(self, data: np.ndarray) -> None:
+        self.data = data
 
-    return pdf_vals
+
+    #Parzen window density estimation, with gaussian kernel
+    def fit(self, bandwidth: float, kernel: str ='gaussian') -> KernelDensity:
+        """
+        Fit a kernel density model using the Parzen window method.
+
+        Parameters
+        ----------
+        bandwidth : float
+            Bandwidth of the kernel.
+        kernel : str, optional
+            Type of kernel to use. Default is 'gaussian'.
+
+        Returns
+        -------
+        pwde : KernelDensity
+            Fitted kernel density model.
+        """
+        pwde = KernelDensity(kernel=kernel, bandwidth=bandwidth).fit(self.data.reshape(-1,1))
+        return pwde
+
+
+    #Evaluate the log density model on the points.
+    def estimate(self, points_num: int, bandwidth: float) -> np.ndarray:
+        """
+        Estimate the probability density of the data using the kernel density model.
+
+        Parameters
+        ----------
+        points_num : int
+            Number of points to use for estimating the density.
+        bandwidth : float
+            Bandwidth of the kernel.
+
+        Returns
+        -------
+        pdf_values : ndarray
+            Array of estimated probability density values.
+        """
+        pwde = self.fit(bandwidth=bandwidth)
+        points = np.linspace(-10, 10, points_num)
+        pdf_values = np.exp(pwde.score_samples(points.reshape(-1,1)))
+        return pdf_values
+        
+
+    def plot(self, points_num: int, 
+             bandwidth: float, 
+             pdf_values: np.ndarray, 
+             ax) -> None:  
+        """
+        Plot the estimated density of the data using the kernel density model.
+
+        Parameters
+        ----------
+        points_num : int
+            Number of points to use for estimating the density.
+        bandwidth : float
+            Bandwidth of the kernel.
+        pdf_values : ndarray
+            Array of probability density values to plot.
+        ax : matplotlib Axes
+            Axes object to use for plotting.
+
+        Returns
+        -------
+        None
+            The estimated density is plotted using matplotlib.
+        """          
+        points = np.linspace(-10, 10, points_num)
+        ax.plot(points, pdf_values, 'r.')
+        ax.set(title=f"N= {points_num}, h= {bandwidth}", 
+                xlabel='x',
+                ylabel='pdf')
 
 #Classify with parzen windows
 def Parsen_classify(test_samples, dx1, dx2, dx3, p, h):
@@ -112,66 +191,79 @@ def classification_accuracy(predictions, test_labels):
     return accuracy
 
 
+def create_labels(N1, N2, N3):
+    labels = []
+    for i in range(1, N1+1):
+        labels.append(1)
+    for i in range(1, N2+1):
+        labels.append(2)
+    for i in range(1, N3+1):
+        labels.append(3)
+    return labels
 
-#Α
 
+'''
+There are 3 classes having: P(x|ω1) = N(2, 0.5), P(x|ω2) = N(1,1), P(x|ω3) = N(3, 1.2)
+and priors: P(ω1) = 0.5, P(ω2) = 0.3, P(ω3) = 0.2.
+'''
+
+'''
+- Create random train sample with 100 samples(features) based on above distributions and priors.
+- Create random test sample with 1000 features based on above distributions and priors
+'''
+
+# priors
 p = [0.5, 0.3, 0.2]
 
-#Create the training sets
+# Create the training set according to the priors
 Nx = 100
 Nx1 = int(Nx * p[0])
 Nx2 = int(Nx * p[1])
 Nx3 = int(Nx * p[2])
 
+# data with distributions: N(2, 0.5), N(1,1) and N(3, 1.2) and according to priors
 dx1 = np.random.normal(2, 0.5, Nx1)
 dx2 = np.random.normal(1, 1, Nx2)
 dx3 = np.random.normal(3, 1.2, Nx3)
 
 train_samples = np.concatenate((dx1,dx2,dx3), axis=None)
 
-train_labels = []
-for i in range(1, Nx1+1):
-    train_labels.append(1)
-for i in range(1, Nx2+1):
-    train_labels.append(2)
-for i in range(1, Nx3+1):
-    train_labels.append(3)
+# create labels of classes = 1 or 2 or 3
+train_labels = create_labels(Nx1, Nx2, Nx3)
 
-#Create the testing sets
+# Create the testing set according to the priors
 Ny = 1000
 Ny1 = int(Ny * p[0])
 Ny2 = int(Ny * p[1])
 Ny3 = int(Ny * p[2])
 
+# data with distributions: N(2, 0.5), N(1,1) and N(3, 1.2) and according to priors
 dy1 = np.random.normal(2, 0.5, Ny1)
 dy2 = np.random.normal(1, 1, Ny2)
 dy3 = np.random.normal(3, 1.2, Ny3)
 
 test_samples = np.concatenate((dy1,dy2,dy3), axis=None)
 
-test_labels = []
-for i in range(1, Ny1+1):
-    test_labels.append(1)
-for i in range(1, Ny2+1):
-    test_labels.append(2)
-for i in range(1, Ny3+1):
-    test_labels.append(3)
+# create labels of classes = 1 or 2 or 3
+test_labels = create_labels(Ny1, Ny2, Ny3)
 
 
+'''
+Classify test samples using knn algorithm, for k=1,2,3, and calculate error.
+Compare error to that of the Bayesian classifier.
+'''
 
-#Β
 
-
-#Classify with Knn:
+# Classify with Knn:
 for k in [1, 2, 3]:
-    Knn_classes = Knn(k, test_samples, train_samples, train_labels)
+    Knn_classes = knn_classify(k, test_samples, train_samples, train_labels)
     Acc = classification_accuracy(Knn_classes, test_labels)
     print(str(k)+"-nn accuracy: ", Acc)
 
-#Finding the best k:
+# Finding the best k:
 results = []
 for k in range(1,50):
-    Knn_classes = Knn(k, test_samples, train_samples, train_labels)
+    Knn_classes = knn_classify(k, test_samples, train_samples, train_labels)
     acc = classification_accuracy(Knn_classes, test_labels)
     results.append(acc)
 best_k = max(results)
@@ -179,33 +271,37 @@ best_k_ind = results.index(best_k)
 print(str(best_k_ind) + "-nn accuracy: ", best_k)
 
 
-#Bayesian classifier:
-#Create a Gaussian Classifier
+# Bayesian classifier:
+# Create a Gaussian Classifier
 gnb = GaussianNB()
 
 train_labels = np.array(train_labels)
 test_labels = np.array(test_labels)
-#Train the model using the training sets
+# Train the model using the training sets
 gnb.fit(train_samples.reshape(-1,1), train_labels.reshape(-1,1))
 
-#Predict the response for test dataset
+# Predict the response for test dataset
 y_pred = gnb.predict(test_samples.reshape(-1,1))
 
 # Model Accuracy
-print("Bayesian accuracy:",metrics.accuracy_score(test_labels, y_pred))
+print("Bayesian accuracy:", metrics.accuracy_score(test_labels, y_pred))
 
 
 
-#Γ
+'''
+Use samples for classification using Parzen Windows. 
+Use atleast 4 different values for the bandwidth parameter h = σ (spread) 
+and choose the one with the best results
+'''
 
-#Classify with Parsen window
+# Classify with Parzen window
 for h in [0.02, 0.1, 0.5, 1, 4]:
     parsen_classes = Parsen_classify(test_samples, dx1, dx2, dx3, p, h)
     acc = classification_accuracy(parsen_classes, test_labels)
     print("Parsen accuracy, for h= "+str(h)+": ", acc)
 
 
-#Finding the best h:
+# Finding the best h:
 results = []
 for i in range(1,100):
     h = 0.01 * i
@@ -217,9 +313,10 @@ best_h_ind = 0.01 * results.index(best_h)
 print("Parsen accuracy, for h= "+str(best_h_ind)+": ", best_h)
 
 
-
-#Δ
-
+'''
+Use samples for classification with Parzen Windows/Probabilistic Neural Networks.
+Use 4 different values for the bandwidth parameter h = σ (spread) 
+'''
 
 (w,a) = Pnn_train(train_samples,train_labels)
 for h in [0.02, 0.1, 0.5, 1, 4]:
