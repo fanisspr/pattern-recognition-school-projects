@@ -4,7 +4,7 @@ from sklearn import metrics
 from sklearn.neighbors import KernelDensity
 
 
-def knn_classify(k, test_samples, train_samples, train_labels):
+def knn_classify(k: int, test_samples: np.ndarray, train_samples: np.ndarray, train_labels: list[int]) -> list[int]:
     """
     Classify test samples using the k-nearest neighbors (KNN) algorithm.
 
@@ -16,12 +16,12 @@ def knn_classify(k, test_samples, train_samples, train_labels):
         The test samples.
     train_samples : ndarray
         The training samples.
-    train_labels : list
+    train_labels : list[int]
         The labels for the training samples.
 
     Returns
     -------
-    class_predictions : list
+    class_predictions : list[int]
         A list of class predictions, one for each test sample.
     """
     class_predictions = []
@@ -36,7 +36,7 @@ def knn_classify(k, test_samples, train_samples, train_labels):
 
     return class_predictions
 
-#Create pdf with parsen window
+
 class ParzenWindow: 
     """
     A class for estimating the probability density of a 1D dataset 
@@ -126,63 +126,105 @@ class ParzenWindow:
 
     #Classify with parzen windows
     @staticmethod
-    def classify(priors: list[float], *likelihoods):
+    def classify(priors: list[float], *likelihoods: np.ndarray) -> list[int]:
+        """
+        Classify samples using the Bayes rule.
+
+        Parameters
+        ----------
+        priors : list[float]
+            A list of prior probabilities for each class.
+        likelihoods : list[np.ndarray]
+            A list of likelihoods for each class, 
+            where each likelihood is a list of likelihood values for each sample.
+
+        Returns
+        -------
+        predictions : list[int]
+            A list of predicted class labels for each sample.
+        """
         # likelihood = ParsenWindow(train_samples,test_samples,h)
         predictions = []
-        for i in range(0, len(likelihoods[0])):
+        for i in range(len(likelihoods[0])):
             post_p1 = likelihoods[0][i] * priors[0]
-            post_p2 = likelihood2[1][i] * priors[1]
-            post_p3 = likelihood3[2][i] * priors[2]
+            post_p2 = likelihoods[1][i] * priors[1]
+            post_p3 = likelihoods[2][i] * priors[2]
             prediction = max(post_p1,post_p2,post_p3)
             if (prediction == post_p1):
                 predictions.append(1)
             elif(prediction == post_p2):
                 predictions.append(2)
             else: predictions.append(3)
-
         return predictions
 
-#Train the Pnn model
-def Pnn_train(X,y):
-    w = []
-    a = []
-    # a = np.zeros(3, X.size)
 
-    for (i,train_samp) in enumerate(X):
+def pnn_train(X: np.ndarray, y: np.ndarray) -> tuple[list[np.ndarray], list[int]]:
+    """
+    Train a Probabilistic Neural Network (PNN) classifier.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        A numpy array of shape (n_samples, n_features) representing the input data.
+    y : np.ndarray
+        A numpy array of shape (n_samples,) representing the class labels.
+
+    Returns
+    -------
+    weights : list[np.ndarray]
+        A list of numpy arrays, where each array represents the weights for one sample in X.
+    activations : list[int]
+        A list of class labels, where each element represents the activation for one sample in X.
+    """
+    weights = []
+    activations = []
+    # activations = np.zeros(3, X.size)
+
+    for i, train_samp in enumerate(X):
         #normalize
         train_samp = train_samp / abs(train_samp)
         #Weight training
-        w.append(train_samp)
+        weights.append(train_samp)
         #Activation (Connection to known class y[i])
-        a.append(y[i])
+        activations.append(y[i])
+    return weights, activations
 
-        #alternative:
-        # if(train_labels[i] == 1):
-        #     a[0][i] = 1
-        # elif(train_labels[i] == 2):
-        #     a[1][i] = 1
-        # else:
-        #     a[2][i] = 1
 
-    return (w,a)
+def pnn_classify(X: np.ndarray, weights: list[np.ndarray], activations: list[int], h: float) -> list[int]:
+    """
+    Classify samples using a Probabilistic Neural Network (PNN).
 
-#Classify with parzen Pnn
-def Pnn_classify(X, w, a, h):
+    Parameters
+    ----------
+    X : np.ndarray
+        A numpy array of shape (n_samples, n_features) representing the input data.
+    weights : list[np.ndarray]
+        A list of numpy arrays, where each array represents the weights for one sample in X.
+    activations : list[int]
+        A list of class labels, where each element represents the activation for one sample in X.
+    h : float
+        The spread constant for the Gaussian function used in the PNN.
+
+    Returns
+    -------
+    predictions : list[int]
+        A list of predicted class labels for each sample in X.
+    """
     predictions = []
 
-    for (i,test_samp) in enumerate(X):
+    for i, test_samp in enumerate(X):
         sum1 = 0
         sum2 = 0
         sum3 = 0
-        net = [weight * test_samp for weight in w]
+        net = [weight * test_samp for weight in weights]
 
-        for (j,cl) in enumerate(a):
+        for j, cl in enumerate(activations):
             activation = np.exp((net[j] - 1) / (h**2))
             if (cl == 1):
                 sum1 += activation
-            if (cl == 2):
+            elif (cl == 2):
                 sum2 += activation
-            if (cl == 3):
+            elif (cl == 3):
                 sum3 += activation
 
         prediction = max(sum1,sum2,sum3)
@@ -196,7 +238,22 @@ def Pnn_classify(X, w, a, h):
     return predictions
 
 
-def classification_accuracy(predictions, test_labels):
+def classification_accuracy(predictions: list[int], test_labels: list[int]) -> float:
+    """
+    Calculate the classification accuracy given predicted class labels and true class labels.
+
+    Parameters
+    ----------
+    predictions : list[int]
+        A list of predicted class labels.
+    test_labels : list[int]
+        A list of true class labels.
+
+    Returns
+    -------
+    accuracy : float
+        The classification accuracy, defined as the number of correct predictions divided by the total number of samples.
+    """
     correct = 0
     for i in range(len(test_labels)):
         if test_labels[i] == predictions[i]:
@@ -206,7 +263,24 @@ def classification_accuracy(predictions, test_labels):
     return accuracy
 
 
-def create_labels(N1, N2, N3):
+def create_labels(N1: int, N2: int, N3: int) -> list[int]:
+    """
+    Create a list of class labels.
+
+    Parameters
+    ----------
+    N1 : int
+        The number of samples in class 1.
+    N2 : int
+        The number of samples in class 2.
+    N3 : int
+        The number of samples in class 3.
+
+    Returns
+    -------
+    labels : list[int]
+        A list of class labels, where each label is either 1, 2, or 3.
+    """
     labels = []
     for i in range(1, N1+1):
         labels.append(1)
@@ -294,13 +368,10 @@ train_labels = np.array(train_labels)
 test_labels = np.array(test_labels)
 # Train the model using the training sets
 gnb.fit(train_samples.reshape(-1,1), train_labels.reshape(-1,1))
-
 # Predict the response for test dataset
 y_pred = gnb.predict(test_samples.reshape(-1,1))
-
 # Model Accuracy
 print("Bayesian accuracy:", metrics.accuracy_score(test_labels, y_pred))
-
 
 
 '''
@@ -319,7 +390,7 @@ for h in [0.02, 0.1, 0.5, 1, 4]:
     likelihood3 = pw3.estimate(test_samples, h)
     parzen_classes = ParzenWindow.classify(p, likelihood1, likelihood2, likelihood3)
     acc = classification_accuracy(parzen_classes, test_labels)
-    print("Parsen accuracy, for h= "+str(h)+": ", acc)
+    print("Parzen window accuracy, for h= "+str(h)+": ", acc)
 
 
 # Finding the best h:
@@ -334,7 +405,7 @@ for i in range(1,100):
     results.append(acc)
 best_h = max(results)
 best_h_ind = 0.01 * results.index(best_h)
-print("Parsen accuracy, for h= "+str(best_h_ind)+": ", best_h)
+print("Parzen window accuracy, for h= "+str(best_h_ind)+": ", best_h)
 
 
 '''
@@ -342,10 +413,8 @@ Use samples for classification with Parzen Windows/Probabilistic Neural Networks
 Use 4 different values for the bandwidth parameter h = σ (spread) 
 '''
 
-(w,a) = Pnn_train(train_samples,train_labels)
+weights, activations = pnn_train(train_samples, train_labels)
 for h in [0.02, 0.1, 0.5, 1, 4]:
-    Pnn_classes = Pnn_classify(test_samples, w, a, h)
+    Pnn_classes = pnn_classify(test_samples, weights, activations, h)
     Acc = classification_accuracy(Pnn_classes, test_labels)
-    print("Parsen/Pnn accuracy, for h= "+str(h)+": ", Acc)
-
-
+    print("Parzen/Pnn accuracy, for h= "+str(h)+": ", Acc)
