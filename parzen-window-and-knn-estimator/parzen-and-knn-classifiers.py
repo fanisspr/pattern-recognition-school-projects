@@ -375,9 +375,9 @@ print("Bayesian accuracy:", metrics.accuracy_score(test_labels, y_pred))
 
 
 '''
-Use samples for classification using Parzen Windows. 
-Use atleast 4 different values for the bandwidth parameter h = σ (spread) 
-and choose the one with the best results
+- Use samples for classification using Parzen Windows. 
+- Use atleast 4 different values for the bandwidth parameter h = σ (spread) 
+  and choose the one with the best results
 '''
 
 # Classify with Parzen window
@@ -409,8 +409,8 @@ print("Parzen window accuracy, for h= "+str(best_h_ind)+": ", best_h)
 
 
 '''
-Use samples for classification with Parzen Windows/Probabilistic Neural Networks.
-Use 4 different values for the bandwidth parameter h = σ (spread) 
+- Use samples for classification with Parzen Windows/Probabilistic Neural Networks.
+- Use 4 different values for the bandwidth parameter h = σ (spread) 
 '''
 
 weights, activations = pnn_train(train_samples, train_labels)
