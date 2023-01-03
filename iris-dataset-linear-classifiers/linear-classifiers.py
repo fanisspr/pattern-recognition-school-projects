@@ -1,11 +1,14 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import preprocessing
 from numpy.linalg import inv
 
+root_dir = os.path.relpath(os.path.dirname(__file__))
 
-def plotData(X, y, title=None, xlabel=None, ylabel=None, theta=None):
+#todo add legends
+def plot_data(X, y, title=None, xlabel=None, ylabel=None, theta=None):
     """
         plotData: Function to plot data.
         Using this function you are able to plot your training data with/without your linear regression model.
@@ -44,7 +47,7 @@ def plotData(X, y, title=None, xlabel=None, ylabel=None, theta=None):
     plt.show()
 
 
-def featureStandardize(X):
+def feature_standardize(X):
     X_norm = X
     mu = np.zeros((1, X.shape[1]))
     sigma = np.zeros((1, X.shape[1]))
@@ -66,7 +69,7 @@ def predict(X, theta, bias = 0):
     return pred
 
 
-def batchPerceptron(X, y, alpha, num_iters):
+def batch_perceptron(X, y, alpha, num_iters):
     """
     Estimate perceptron weights using gradient descent with gradient of cost function J: = -Σy
     where y = falsely classified samples
@@ -108,7 +111,7 @@ def batchPerceptron(X, y, alpha, num_iters):
     return best
 
 
-def batchRelaxationWithMargin(X, y, alpha, margin, num_iters):
+def batch_relaxation_with_margin(X, y, alpha, margin, num_iters):
     """
     Estimate perceptron weights using gradient descent with gradient of cost function J: =
     where y = falsely classified samples
@@ -155,7 +158,7 @@ def batchRelaxationWithMargin(X, y, alpha, margin, num_iters):
     return best
 
 
-def leastSquares(X, y):
+def least_squares(X, y):
     """
     Least squares using pseudoinverse
     (Minimum square error)
@@ -175,7 +178,7 @@ def leastSquares(X, y):
     return theta
 
 
-def leastMeanSquares(X, y, alpha, num_iters):
+def least_mean_squares(X, y, alpha, num_iters):
     """
     Least Mean squares
     (Widrow-Hoff)
@@ -208,7 +211,7 @@ def leastMeanSquares(X, y, alpha, num_iters):
     return best
 
 
-def leastSquares_HoKa(X, b, alpha, num_iters):
+def least_squares_HoKa(X, b, alpha, num_iters):
     """
     Least squares using Ho-kashyap method
     """
@@ -246,7 +249,7 @@ def leastSquares_HoKa(X, b, alpha, num_iters):
 # def Kesler(X,y):
 
 
-data = pd.read_csv("iris.csv", header=None)
+data = pd.read_csv(os.path.join(root_dir, "iris.csv"), header=None)
 temp = data.to_numpy()
 
 X_temp = temp[:, :-1]
@@ -254,10 +257,10 @@ Y_temp = temp[:, -1]
 
 #Normalization
 # X_norm = preprocessing.normalize(X_temp)
-(X_norm,mu,sigma) = featureStandardize(X_temp)
+X_norm, mu, sigma = feature_standardize(X_temp)
 
 # insert ones as a first dimension feature
-X_norm = np.column_stack((np.ones((X_norm.shape[0])),X_norm))
+X_norm = np.column_stack((np.ones((X_norm.shape[0])), X_norm))
 
 # #Classes 0='Iris-setosa', 1='Iris-versicolor', 2='Iris-virginica'
 # y_class = []
@@ -312,7 +315,9 @@ for i in range(50):
 y_virginica = np.array(y_virginica)
 
 """
-A
+- Find a linear classifier seperating Iris Setosa from the others using:
+  - batch perceptron
+  - batch relaxation with margin
 """
 print("A")
 print("Finding linear classifier seperating setosa from the others:")
@@ -320,32 +325,36 @@ print("Finding linear classifier seperating setosa from the others:")
 num_iters = 200
 
 alpha = 0.01
-theta = batchPerceptron(X_norm, y_setosa, alpha, num_iters)
-plotData(X_norm,y_setosa,title="A) Batch perceptron",xlabel="sepal length", ylabel="sepal width",theta=theta)
+theta = batch_perceptron(X_norm, y_setosa, alpha, num_iters)
+plot_data(X_norm, y_setosa, title="A) Batch perceptron", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
 alpha = 0.01
 margin = 0.5
-theta = batchRelaxationWithMargin(X_norm, y_setosa, alpha, margin, num_iters)
-plotData(X_norm,y_setosa,title="A)Batch perceptron with margin",xlabel="sepal length", ylabel="sepal width",theta=theta)
+theta = batch_relaxation_with_margin(X_norm, y_setosa, alpha, margin, num_iters)
+plot_data(X_norm, y_setosa, title="A)Batch perceptron with margin", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
 
 """
-B
+- Find a linear classifier seperating Iris Setosa from the others using:
+  - least squares (with the use of the pseudotranspose)
+  - least mean squares (Windrow-Hopf)
 """
 print("B")
 print("Finding linear classifier seperating setosa from the others:")
 
-theta = leastSquares(X_norm, y_setosa)
-plotData(X_norm,y_setosa,title="B) Least Squares",xlabel="sepal length", ylabel="sepal width",theta=theta)
+theta = least_squares(X_norm, y_setosa)
+plot_data(X_norm, y_setosa, title="B) Least Squares", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
 
 alpha = 0.001
-theta = leastMeanSquares(X_norm, y_setosa, alpha, num_iters)
-plotData(X_norm,y_setosa,title="B) Least Mean Squares",xlabel="sepal length", ylabel="sepal width",theta=theta)
+theta = least_mean_squares(X_norm, y_setosa, alpha, num_iters)
+plot_data(X_norm, y_setosa, title="B) Least Mean Squares", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
 
 """
-#C
+- Find a linear classifier seperating versicolour and virginica using:
+  - least squares (with the use of the pseudotranspose)
+  - least squares (Ho-Kashyap method)
 """
 print("C")
 print("Finding linear classifier seperating versivolour and virginia:")
@@ -361,25 +370,25 @@ for i in range(50):
 y_2_3 = np.array(y_2_3)
 
 
-theta = leastSquares(X_norm_2_3, y_2_3)
-plotData(X_norm_2_3, y_2_3 ,title="C) Least squares",xlabel="sepal length", ylabel="sepal width",theta=theta)
+theta = least_squares(X_norm_2_3, y_2_3)
+plot_data(X_norm_2_3, y_2_3, title="C) Least squares", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
 
 alpha = 0.01
-theta, b = leastSquares_HoKa(X_norm_2_3, y_2_3, alpha, num_iters)
-plotData(X_norm_2_3, y_2_3 ,title="C) Least squares with Ho-Kashyap",xlabel="sepal length", ylabel="sepal width",theta=theta)
+theta, b = least_squares_HoKa(X_norm_2_3, y_2_3, alpha, num_iters)
+plot_data(X_norm_2_3, y_2_3, title="C) Least squares with Ho-Kashyap", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
 
 """
-D
+- Find linear classifiers of all 3 classes using least squares(pseudotranspose) method and all features
 """
 print("D")
 print("Finding linear classifiers of all 3 classes:")
 
 theta_multi = np.zeros((X_norm.shape[1],3))
-theta_multi[:,0] = leastSquares(X_norm, y_setosa)
-theta_multi[:,1] = leastSquares(X_norm, y_versicolor)
-theta_multi[:,2] = leastSquares(X_norm, y_virginica)
+theta_multi[:,0] = least_squares(X_norm, y_setosa)
+theta_multi[:,1] = least_squares(X_norm, y_versicolor)
+theta_multi[:,2] = least_squares(X_norm, y_virginica)
 
 set = y_setosa == 1
 vers = y_versicolor == 1
@@ -395,7 +404,8 @@ plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,2]), color='red',
 plt.show()
 
 """
-E
+- Find linear classifiers of all 3 classes for spaces (1,2,3), (2,3,4) using least squares method
+- Plot the hyperplanes 
 """
 print("E")
 print("Finding linear classifiers of all 3 classes for spaces (1,2,3), (2,3,4):")
@@ -406,15 +416,15 @@ X_norm_2_3_4 = np.column_stack((np.ones((X_norm.shape[0])), X_norm_2_3_4))
 
 print("(1,2,3)")
 theta_multi = np.zeros((X_norm_1_2_3.shape[1], 3))
-theta_multi[:, 0] = leastSquares(X_norm_1_2_3, y_setosa)
-theta_multi[:, 1] = leastSquares(X_norm_1_2_3, y_versicolor)
-theta_multi[:, 2] = leastSquares(X_norm_1_2_3, y_virginica)
+theta_multi[:, 0] = least_squares(X_norm_1_2_3, y_setosa)
+theta_multi[:, 1] = least_squares(X_norm_1_2_3, y_versicolor)
+theta_multi[:, 2] = least_squares(X_norm_1_2_3, y_virginica)
 
 print("(2,3,4)")
 theta_multi = np.zeros((X_norm_2_3_4.shape[1], 3))
-theta_multi[:, 0] = leastSquares(X_norm_2_3_4, y_setosa)
-theta_multi[:, 1] = leastSquares(X_norm_2_3_4, y_versicolor)
-theta_multi[:, 2] = leastSquares(X_norm_2_3_4, y_virginica)
+theta_multi[:, 0] = least_squares(X_norm_2_3_4, y_setosa)
+theta_multi[:, 1] = least_squares(X_norm_2_3_4, y_versicolor)
+theta_multi[:, 2] = least_squares(X_norm_2_3_4, y_virginica)
 
 plt.title("E) All 3 linear classifiers for space (2,3,4)")
 plt.plot(X_norm[set, 3], X_norm[set, 4],'k*', lw=2, ms=10)
@@ -431,8 +441,10 @@ plt.plot(X2[:, 1], np.matmul(X2[:, 0:2], [theta_multi[0,2], theta_multi[3,2]]), 
 
 plt.show()
 
+
+#todo 
 """
-F
+- Find linear classifiers of all 3 classes using Kesler structure
 """
 # print("F")
 # print("Finding linear classifiers of all 3 classes:")
