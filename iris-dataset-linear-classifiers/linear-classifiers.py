@@ -255,8 +255,7 @@ X_temp = temp[:, :-1]
 Y_temp = temp[:, -1]
 
 #Normalization
-X_norm = preprocessing.normalize(X_temp)
-# X_norm = feature_standardize(X_temp)
+X_norm = feature_standardize(X_temp)
 
 # insert ones as a first dimension feature
 X_norm = np.column_stack((np.ones((X_norm.shape[0])), X_norm))
@@ -269,23 +268,13 @@ for c in range(3):
 y = np.array(y_class)
 
 #Classes 1='Iris-setosa', -1 ='Iris-versicolor' or 'Iris-virginica'
-y_setosa = []
-for i in range(50):
-    y_setosa.append(1)
-for i in range(100):
-    y_setosa.append(-1)
-y_setosa = np.array(y_setosa)
+y_setosa = np.array([1 if i==0 else -1 for i in y])
 
 #Classes -1='Iris-setosa' or 'Iris-virginica', 1= 'Iris-versicolor'
 y_versicolor = np.array([1 if i==1 else -1 for i in y])
 
 #Classes -1='Iris-setosa' or 'Iris-versicolor', 1= 'Iris-virginica'
-y_virginica = []                                    
-for i in range(100):
-    y_virginica.append(-1)
-for i in range(50):
-    y_virginica.append(1)
-y_virginica = np.array(y_virginica)
+y_virginica = np.array([1 if i==2 else -1 for i in y])
 
 """
 - Find a linear classifier seperating Iris Setosa from the others using:
