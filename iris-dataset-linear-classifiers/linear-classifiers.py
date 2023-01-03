@@ -1,3 +1,8 @@
+'''
+The Iris data set consists of 50 samples from each of three species of Iris (Iris Setosa, Iris virginica, and Iris versicolor). 
+Four features were measured from each sample: the length and the width of the sepals and petals, in centimeters.
+Iris Setosa is the only one that is linearly seperable from the others
+'''
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +17,9 @@ def plot_data(X: np.ndarray,
               title: str | None = None, 
               xlabel: str | None = None, 
               ylabel: str | None = None, 
-              theta: np.ndarray | None = None):
+              theta: np.ndarray | None = None,
+              first_class_label: str | None = None,
+              other_class_label: str | None = None):
     """
     Plot data with optional linear regression model.
 
@@ -37,8 +44,8 @@ def plot_data(X: np.ndarray,
     neg = y == -1
 
     plt.figure()
-    plt.plot(X[pos, 1], X[pos, 2], 'k*', lw=2, ms=10)
-    plt.plot(X[neg, 1], X[neg, 2], 'ko', mfc='y', ms=8, mec='k', mew=1)
+    plt.plot(X[pos, 1], X[pos, 2], 'k*', lw=2, ms=10, label=first_class_label)
+    plt.plot(X[neg, 1], X[neg, 2], 'ko', mfc='y', ms=8, mec='k', mew=1, label=other_class_label)
     if title is not None:
         plt.title(title)
     if xlabel is not None:
@@ -366,14 +373,15 @@ print("Finding linear classifier seperating setosa from the others:")
 num_iters = 200
 
 alpha = 0.01
-# alpha = 0.05
 theta = batch_perceptron(X_norm, y_setosa, alpha, num_iters)
-plot_data(X_norm, y_setosa, title="A) Batch perceptron", xlabel="sepal length", ylabel="sepal width", theta=theta)
+plot_data(X_norm, y_setosa, title="A) Batch perceptron", xlabel="sepal length", ylabel="sepal width", theta=theta, 
+            first_class_label='Iris Setosa', other_class_label='Iris Versicolor, Virginica')
 
 alpha = 0.01
 margin = 0.5
 theta = batch_relaxation_with_margin(X_norm, y_setosa, alpha, margin, num_iters)
-plot_data(X_norm, y_setosa, title="A)Batch perceptron with margin", xlabel="sepal length", ylabel="sepal width", theta=theta)
+plot_data(X_norm, y_setosa, title="A)Batch perceptron with margin", xlabel="sepal length", ylabel="sepal width", theta=theta,
+            first_class_label='Iris Setosa', other_class_label='Iris Versicolor, Virginica')
 
 
 """
@@ -385,12 +393,14 @@ print("B")
 print("Finding linear classifier seperating setosa from the others:")
 
 theta = least_squares(X_norm, y_setosa)
-plot_data(X_norm, y_setosa, title="B) Least Squares", xlabel="sepal length", ylabel="sepal width", theta=theta)
+plot_data(X_norm, y_setosa, title="B) Least Squares", xlabel="sepal length", ylabel="sepal width", theta=theta,
+        first_class_label='Iris Setosa', other_class_label='Iris Versicolor, Virginica')
 
 
 alpha = 0.001
 theta = least_mean_squares(X_norm, y_setosa, alpha, num_iters)
-plot_data(X_norm, y_setosa, title="B) Least Mean Squares", xlabel="sepal length", ylabel="sepal width", theta=theta)
+plot_data(X_norm, y_setosa, title="B) Least Mean Squares", xlabel="sepal length", ylabel="sepal width", theta=theta,
+        first_class_label='Iris Setosa', other_class_label='Iris Versicolor, Virginica')
 
 
 """
@@ -413,12 +423,14 @@ y_2_3 = np.array(y_2_3)
 
 
 theta = least_squares(X_norm_2_3, y_2_3)
-plot_data(X_norm_2_3, y_2_3, title="C) Least squares", xlabel="sepal length", ylabel="sepal width", theta=theta)
+plot_data(X_norm_2_3, y_2_3, title="C) Least squares", xlabel="sepal length", ylabel="sepal width", theta=theta,
+        first_class_label='Iris Virginica', other_class_label='Iris Versicolor')
 
 
 alpha = 0.01
 theta, b = least_squares_HoKa(X_norm_2_3, y_2_3, alpha, num_iters)
-plot_data(X_norm_2_3, y_2_3, title="C) Least squares with Ho-Kashyap", xlabel="sepal length", ylabel="sepal width", theta=theta)
+plot_data(X_norm_2_3, y_2_3, title="C) Least squares with Ho-Kashyap", xlabel="sepal length", ylabel="sepal width", theta=theta,
+            first_class_label='Iris Virginica', other_class_label='Iris Versicolor')
 
 
 """
@@ -437,12 +449,16 @@ vers = y_versicolor == 1
 virg = y_virginica == 1
 
 plt.title("D) All 3 linear classifiers")
-plt.plot(X_norm[set, 1], X_norm[set, 2],'k*', lw=2, ms=10)
-plt.plot(X_norm[vers, 1], X_norm[vers, 2],'ko', mfc='y', ms=8,mec='k',mew=1)
-plt.plot(X_norm[virg, 1], X_norm[virg, 2],'r+', mfc='r', ms=8)
-plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,0]), color='black', linewidth=2) # Line visualization
-plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,1]), color='blue', linewidth=2) # Line visualization
-plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,2]), color='red', linewidth=2) # Line visualization
+plt.plot(X_norm[set, 1], X_norm[set, 2],'k*', lw=2, ms=10, label='Iris Setosa')
+plt.plot(X_norm[vers, 1], X_norm[vers, 2],'ko', mfc='y', ms=8,mec='k',mew=1, label='Iris Versicolor')
+plt.plot(X_norm[virg, 1], X_norm[virg, 2],'r+', mfc='r', ms=8, label='Iris Virginica')
+plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,0]), color='black', linewidth=2, 
+        label='Linear Regression/Setosa') # Line visualization
+plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,1]), color='blue', linewidth=2, 
+        label='Linear Regression/Versicolor') # Line visualization
+plt.plot(X_norm[:,1], np.matmul(X_norm[:, 0:2],theta_multi[0:2,2]), color='red', linewidth=2,
+        label='Linear Regression/Virginica') # Line visualization
+plt.legend()
 plt.show()
 
 """
@@ -469,18 +485,18 @@ theta_multi[:, 1] = least_squares(X_norm_2_3_4, y_versicolor)
 theta_multi[:, 2] = least_squares(X_norm_2_3_4, y_virginica)
 
 plt.title("E) All 3 linear classifiers for space (2,3,4)")
-plt.plot(X_norm[set, 3], X_norm[set, 4],'k*', lw=2, ms=10)
-plt.plot(X_norm[vers, 3], X_norm[vers, 4],'ko', mfc='y', ms=8, mec='k', mew=1)
-plt.plot(X_norm[virg, 3], X_norm[virg, 4],'r+', mfc='r', ms=8)
+plt.plot(X_norm[set, 3], X_norm[set, 4],'k*', lw=2, ms=10, label='Iris Setosa')
+plt.plot(X_norm[vers, 3], X_norm[vers, 4],'ko', mfc='y', ms=8,mec='k', mew=1, label='Iris Versicolor')
+plt.plot(X_norm[virg, 3], X_norm[virg, 4],'r+', mfc='r', ms=8, label='Iris Virginica')
 X2 = X_norm[:, 3:]
 X2 = np.column_stack((np.ones((X_norm.shape[0])), X2))
 plt.plot(X2[:, 1], np.matmul(X2[:, 0:2], [theta_multi[0,0], theta_multi[1,0]]), color='black', linewidth=3,
-    label='Linear Regression')  # Line visualization
+    label='Linear Regression/Setosa')  # Line visualization
 plt.plot(X2[:, 1], np.matmul(X2[:, 0:2], [theta_multi[0,1], theta_multi[2,1]]), color='blue', linewidth=3,
-    label='Linear Regression')  # Line visualization
+    label='Linear Regression/Versicolor')  # Line visualization
 plt.plot(X2[:, 1], np.matmul(X2[:, 0:2], [theta_multi[0,2], theta_multi[3,2]]), color='red', linewidth=3,
-    label='Linear Regression')  # Line visualization
-
+    label='Linear Regression/Virginica')  # Line visualization
+plt.legend()
 plt.show()
 
 
