@@ -3,21 +3,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import preprocessing
-from numpy.linalg import inv
 
 root_dir = os.path.relpath(os.path.dirname(__file__))
 
-#todo add legends
-def plot_data(X, y, title=None, xlabel=None, ylabel=None, theta=None):
-    """
-        plotData: Function to plot data.
-        Using this function you are able to plot your training data with/without your linear regression model.
 
-        Parameters:
-        -----------
-        X: An [m x n] matrix containing the n-features for m-samples.
-        y: A 1-d vector containing the true value for m-samples.
-        theta: parameters (aka weights)
+def plot_data(X: np.ndarray, 
+              y: np.ndarray, 
+              title: str | None = None, 
+              xlabel: str | None = None, 
+              ylabel: str | None = None, 
+              theta: np.ndarray | None = None):
+    """
+    Plot data with optional linear regression model.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        An [m x n] matrix containing the n-features for m-samples.
+    y : np.ndarray
+        A 1-d vector containing the true value for m-samples.
+    title : Optional[str], optional
+        Title for the plot, by default None
+    xlabel : Optional[str], optional
+        Label for the x-axis, by default None
+    ylabel : Optional[str], optional
+        Label for the y-axis, by default None
+    theta : Optional[np.ndarray], optional
+        Parameters (aka weights) for the linear regression model, by default None
     """
 
     # find indices of each class
@@ -34,20 +46,26 @@ def plot_data(X, y, title=None, xlabel=None, ylabel=None, theta=None):
     if ylabel is not None:
         plt.ylabel(ylabel)
     if theta is not None:
-        plt.plot(X[:, 1], np.matmul(X[:, 0:2], theta[0:2]), color='blue', linewidth=3,
+        plt.plot(X[:, 1], np.dot(X[:, 0:2], theta[0:2]), color='blue', linewidth=3,
                  label='Linear Regression')  # Line visualization
-        # X2 = X[:, 3:]
-        # X2 = np.column_stack((np.ones((X.shape[0])), X2))
-        # # theta2 = theta[3:4]
-        # # theta2 = np.column_stack((theta[0], theta2))
-        # plt.plot(X2[:, 1], np.matmul(X2[:, 0:2], [theta[0], theta[3]]), color='blue', linewidth=3,
-        #          label='Linear Regression')  # Line visualization
-
-    plt.legend(loc="upper left")
+    plt.legend()
     plt.show()
 
 
-def feature_standardize(X):
+def feature_standardize(X: np.ndarray) -> np.ndarray:
+    """
+    Standardize the features in a matrix by subtracting the mean and dividing by the standard deviation.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        A matrix of shape (m, n) where m is the number of samples and n is the number of features.
+
+    Returns
+    -------
+    X_norm : np.ndarray
+        The standardized matrix of shape (m, n).
+    """
     X_norm = X
     mu = np.zeros((1, X.shape[1]))
     sigma = np.zeros((1, X.shape[1]))
@@ -59,44 +77,66 @@ def feature_standardize(X):
     return X_norm
 
 
-def predict(X, theta, bias = 0):
+def predict(X: np.ndarray, theta: np.ndarray, bias: float=0) -> np.ndarray:
+    """
+    Predict class labels for samples in a matrix using a linear classifier.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        A matrix of shape (m, n) where m is the number of samples and n is the number of features.
+    theta : np.ndarray
+        The parameters (aka weights) for the linear classifier.
+    bias : float, optional
+        The bias term for the linear classifier, by default 0.
+
+    Returns
+    -------
+    pred : np.ndarray
+        A vector of predicted class labels, where each label is either 1 or -1.
+    """
 
     activation = np.dot(X, theta)
-    # pred = np.array([1.0 if a >= bias else 0.0 for a in activation])
-    pred = np.array([1.0 if a >= bias else -1.0 for a in activation])
+    pred = np.array([1 if a >= bias else -1 for a in activation])
 
     return pred
 
 
-def batch_perceptron(X, y, alpha, num_iters):
+def batch_perceptron(X: np.ndarray, y: np.ndarray, alpha: float, num_iters: int) -> np.ndarray:
     """
-    Estimate perceptron weights using gradient descent with gradient of cost function J: = -Σy
-    where y = falsely classified samples
+    Estimate perceptron weights using gradient descent with gradient of cost function J: = -Σy, 
+    where y = falsely classified samples.
 
-    Parameters:
-        -----------
-        X: An [m x n] matrix containing the n-features for m-samples.
-        y: A 1-d vector containing the true value for m-samples.
-        theta: parameters (aka weights)
-        alpha: learning rate
-        num_iters: number of iterations
+    Parameters
+    ----------
+    X : np.ndarray
+        An [m x n] matrix containing the n-features for m-samples.
+    y : np.ndarray
+        A 1-d vector containing the true value for m-samples.
+    alpha : float
+        The learning rate for gradient descent.
+    num_iters : int
+        The number of iterations for gradient descent.
+
+    Returns
+    -------
+    best : np.ndarray
+        The best estimated parameters (aka weights) for the perceptron.
     """
     print("============Running Batch Perceptron===========")
     thresh = 0.001
     min = 1.0
     theta = np.zeros(X.shape[1])
+
     for i in range(num_iters):
         prediction = predict(X, theta)
-
-        # errors = abs(y - prediction) # =1 for wrong prediction
         diffs = abs(y - prediction)  # =2 for wrong prediction
-        error = [1 if err == 2 else 0 for err in diffs]
-        grad_J = np.dot(error, X)
+        error = np.array([1 if err == 2 else 0 for err in diffs])
+        grad_J = np.dot(error.T, X)
         theta = theta + alpha * grad_J
 
         error = sum(error)/X.shape[0]
         if error < min:
-            # print("Θ",theta)
             epoch = i
             min = error
             best = theta
@@ -106,23 +146,31 @@ def batch_perceptron(X, y, alpha, num_iters):
             break
     print("Best Result:\n In epoch={}, found theta={} and error={}".format(epoch,best,min))
     print("============================================\n")
-
     return best
 
 
-def batch_relaxation_with_margin(X, y, alpha, margin, num_iters):
+def batch_relaxation_with_margin(X: np.ndarray, y: np.ndarray, alpha: float, margin: float, num_iters: int) -> np.ndarray:
     """
-    Estimate perceptron weights using gradient descent with gradient of cost function J: =
-    where y = falsely classified samples
+    Estimate perceptron weights using gradient descent with gradient of cost function J: = -Σy, 
+    where y = falsely classified samples.
 
-    Parameters:
-        -----------
-        X: An [m x n] matrix containing the n-features for m-samples.
-        y: A 1-d vector containing the true value for m-samples.
-        theta: parameters (aka weights)
-        alpha: learning rate
-        margin: b in a.T*y > b
-        num_iters: number of iterations
+    Parameters
+    ----------
+    X : np.ndarray
+        An [m x n] matrix containing the n-features for m-samples.
+    y : np.ndarray
+        A 1-d vector containing the true value for m-samples.
+    alpha : float
+        The learning rate for gradient descent.
+    margin : float
+        The margin term 'b' in the inequality 'a.T*y > b'.
+    num_iters : int
+        The number of iterations for gradient descent.
+
+    Returns
+    -------
+    best : np.ndarray
+        The estimated parameters (aka weights) for the perceptron.
     """
     print("========Running Batch relaxation with margin========")
     thresh = 0.001
@@ -130,13 +178,9 @@ def batch_relaxation_with_margin(X, y, alpha, margin, num_iters):
     theta = np.zeros(X.shape[1])
     for i in range(num_iters):
         prediction = predict(X, theta, margin)
-        # print("pred",prediction)
-        # error = abs(y - prediction) # =1 for wrong prediction
-
         diffs = abs(y - prediction)  # =2 for wrong prediction
         error = [1 if err == 2 else 0 for err in diffs]
         missclassified = np.dot(error, X).astype("float64")
-        # print(missclassified)
         if all(missclassified) == 0:
             break
         grad_J = np.dot(missclassified.T, margin - np.dot(missclassified, theta) / np.dot(missclassified.T, missclassified))
@@ -144,7 +188,6 @@ def batch_relaxation_with_margin(X, y, alpha, margin, num_iters):
 
         error = sum(error) / X.shape[0]
         if error < min:
-            # print("Θ",theta)
             epoch = i
             min = error
             best = theta
@@ -157,30 +200,53 @@ def batch_relaxation_with_margin(X, y, alpha, margin, num_iters):
     return best
 
 
-def least_squares(X, y):
+def least_squares(X: np.ndarray, y: np.ndarray) -> np.ndarray:
     """
-    Least squares using pseudoinverse
     (Minimum square error)
+    Calculate the least squares solution for a linear regression model using the pseudoinverse.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        An [m x n] matrix containing the n-features for m-samples.
+    y : np.ndarray
+        A 1-d vector containing the true value for m-samples.
+
+    Returns
+    -------
+    theta : np.ndarray
+        The estimated parameters (aka weights) for the linear regression model.
     """
     print("============Least square errors============")
     dot = np.dot(X.T, X).astype("float64")
     X_inv = np.linalg.inv(dot)
     theta = np.dot(np.dot(X_inv, X.T), y)
     prediction = predict(X, theta)
-    # errors = abs(y - prediction) # =1 for wrong prediction
-    # diffs = abs(y - prediction)  # =2 for wrong prediction
-    # errors = [1 if err==2 else 0 for err in diffs]
-    # error = sum(errors) / X.shape[0]
     error = np.mean(y != prediction)
     print("Calculated theta= {}. \nError= {}".format(theta,error))
     print("============================================\n")
     return theta
 
 
-def least_mean_squares(X, y, alpha, num_iters):
+def least_mean_squares(X: np.ndarray, y: np.ndarray, alpha: float, num_iters: int) -> np.ndarray:
     """
-    Least Mean squares
-    (Widrow-Hoff)
+    Estimate parameters for a linear regression model using the least mean squares (Widrow-Hoff) algorithm.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        An [m x n] matrix containing the n-features for m-samples.
+    y : np.ndarray
+        A 1-d vector containing the true value for m-samples.
+    alpha : float
+        The learning rate for the least mean squares algorithm.
+    num_iters : int
+        The number of iterations for the least mean squares algorithm.
+
+    Returns
+    -------
+    best : np.ndarray
+        The best estimated parameters (aka weights) for the linear regression model.
     """
     print("============Least mean squares============")
     thresh = 0.001
@@ -191,13 +257,8 @@ def least_mean_squares(X, y, alpha, num_iters):
         theta = theta - alpha * grad_J
 
         prediction = predict(X, theta)
-        # error = abs(y - prediction)
-        # diffs = abs(y - prediction)  # =2 for wrong prediction
-        # error = [1 if err == 2 else 0 for err in diffs]
-        # error = sum(error) / X.shape[0]
         error = np.mean(y != prediction)
         if error < min:
-            # print("Θ",theta)
             epoch = i
             min = error
             best = theta
@@ -210,9 +271,27 @@ def least_mean_squares(X, y, alpha, num_iters):
     return best
 
 
-def least_squares_HoKa(X, b, alpha, num_iters):
+def least_squares_HoKa(X: np.ndarray, b: np.ndarray, alpha: float, num_iters: int) -> tuple[np.ndarray, np.ndarray]:
     """
-    Least squares using Ho-kashyap method
+    Estimate parameters for a linear regression model using the least squares method with the Ho-Kashyap algorithm.
+
+    Parameters
+    ----------
+    X : np.ndarray
+        An [m x n] matrix containing the n-features for m-samples.
+    b : np.ndarray
+        A 1-d vector containing the true value for m-samples.
+    alpha : float
+        The learning rate for the Ho-Kashyap algorithm.
+    num_iters : int
+        The number of iterations for the Ho-Kashyap algorithm.
+
+    Returns
+    -------
+    theta : np.ndarray
+        The estimated parameters (aka weights) for the linear regression model.
+    b : np.ndarray
+        The updated value of b from the Ho-Kashyap algorithm.
     """
     print("============Least square errors (Ho-Kashyap)============")
     thresh_b = 1
@@ -287,6 +366,7 @@ print("Finding linear classifier seperating setosa from the others:")
 num_iters = 200
 
 alpha = 0.01
+# alpha = 0.05
 theta = batch_perceptron(X_norm, y_setosa, alpha, num_iters)
 plot_data(X_norm, y_setosa, title="A) Batch perceptron", xlabel="sepal length", ylabel="sepal width", theta=theta)
 
@@ -298,7 +378,7 @@ plot_data(X_norm, y_setosa, title="A)Batch perceptron with margin", xlabel="sepa
 
 """
 - Find a linear classifier seperating Iris Setosa from the others using:
-  - least squares (with the use of the pseudotranspose)
+  - least squares (with the use of the pseudoinverse)
   - least mean squares (Windrow-Hopf)
 """
 print("B")
@@ -315,7 +395,7 @@ plot_data(X_norm, y_setosa, title="B) Least Mean Squares", xlabel="sepal length"
 
 """
 - Find a linear classifier seperating versicolour and virginica using:
-  - least squares (with the use of the pseudotranspose)
+  - least squares (with the use of the pseudoinverse)
   - least squares (Ho-Kashyap method)
 """
 print("C")
@@ -342,7 +422,7 @@ plot_data(X_norm_2_3, y_2_3, title="C) Least squares with Ho-Kashyap", xlabel="s
 
 
 """
-- Find linear classifiers of all 3 classes using least squares(pseudotranspose) method and all features
+- Find linear classifiers of all 3 classes using least squares(pseudoinverse) method and all features
 """
 print("D")
 print("Finding linear classifiers of all 3 classes:")
@@ -390,7 +470,7 @@ theta_multi[:, 2] = least_squares(X_norm_2_3_4, y_virginica)
 
 plt.title("E) All 3 linear classifiers for space (2,3,4)")
 plt.plot(X_norm[set, 3], X_norm[set, 4],'k*', lw=2, ms=10)
-plt.plot(X_norm[vers, 3], X_norm[vers, 4],'ko', mfc='y', ms=8,mec='k',mew=1)
+plt.plot(X_norm[vers, 3], X_norm[vers, 4],'ko', mfc='y', ms=8, mec='k', mew=1)
 plt.plot(X_norm[virg, 3], X_norm[virg, 4],'r+', mfc='r', ms=8)
 X2 = X_norm[:, 3:]
 X2 = np.column_stack((np.ones((X_norm.shape[0])), X2))
