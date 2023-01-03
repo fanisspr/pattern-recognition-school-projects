@@ -56,8 +56,7 @@ def feature_standardize(X):
         mu[:, i] = np.mean(X[:, i])
         sigma[:, i] = np.std(X[:, i])
         X_norm[:, i] = (X[:, i] - float(mu[:, i])) / float(sigma[:, i])
-
-    return X_norm, mu, sigma
+    return X_norm
 
 
 def predict(X, theta, bias = 0):
@@ -256,37 +255,11 @@ X_temp = temp[:, :-1]
 Y_temp = temp[:, -1]
 
 #Normalization
-# X_norm = preprocessing.normalize(X_temp)
-X_norm, mu, sigma = feature_standardize(X_temp)
+X_norm = preprocessing.normalize(X_temp)
+# X_norm = feature_standardize(X_temp)
 
 # insert ones as a first dimension feature
 X_norm = np.column_stack((np.ones((X_norm.shape[0])), X_norm))
-
-# #Classes 0='Iris-setosa', 1='Iris-versicolor', 2='Iris-virginica'
-# y_class = []
-# for c in range(3):
-#     for i in range(50):
-#         y_class.append(c)
-# y = np.array(y_class)
-#
-# #Classes 1='Iris-setosa', 0='Iris-versicolor' or 'Iris-virginica'
-# y_setosa = []
-# for i in range(50):
-#     y_setosa.append(1)
-# for i in range(100):
-#     y_setosa.append(0)
-# y_setosa = np.array(y_setosa)
-#
-# #Classes 0='Iris-setosa' or 'Iris-virginica', 1= 'Iris-versicolor'
-# y_versicolor = np.array([i if i!=2 else 0 for i in y])
-#
-# #Classes 0='Iris-setosa' or 'Iris-versicolor', 1= 'Iris-virginica'
-# y_virginica = []                                    
-# for i in range(100):
-#     y_virginica.append(0)
-# for i in range(50):
-#     y_virginica.append(1)
-# y_virginica = np.array(y_virginica)
 
 #Classes 0='Iris-setosa', 1='Iris-versicolor', 2='Iris-virginica'
 y_class = []
