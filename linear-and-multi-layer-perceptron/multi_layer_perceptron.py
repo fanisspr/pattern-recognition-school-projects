@@ -9,10 +9,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow_datasets as tfds
-# import tensorflow_transform as tft
 from tensorflow import keras
 from tensorflow.keras import layers
 import os
+
+
+root_dir = os.path.relpath(os.path.dirname(__file__))
+models_dir = os.path.join(root_dir, 'models-and-history')
+if not os.path.exists(models_dir):
+    os.mkdir(models_dir)
 
 
 def multi_layer_Perceptron(input_shape: tuple[int]=(4,), 
@@ -51,7 +56,6 @@ def plot_history(hist: dict[str, list[float]]):
     ax.plot(hist['loss'], lw=3)
     ax.plot(hist['val_loss'], lw=3)
     plt.legend(['Train loss', 'Validation loss'], fontsize=15)
-    # ax.set_title('Training loss', size=15)
     ax.set_xlabel('Epochs', size=15)
     ax.tick_params(axis='both', which='major', labelsize=15)
 
@@ -59,7 +63,6 @@ def plot_history(hist: dict[str, list[float]]):
     ax.plot(hist['accuracy'], lw=3)
     ax.plot(hist['val_accuracy'], lw=3)
     plt.legend(['Train Acc.', 'Validation Acc.'], fontsize=15)
-    # ax.set_title('Training accuracy', size=15)
     ax.set_xlabel('Epochs', size=15)
     ax.tick_params(axis='both', which='major', labelsize=15)
     plt.show()
@@ -101,15 +104,13 @@ ds_valid = ds_valid.batch(batch_size=batch_size)
 ds_valid = ds_valid.prefetch(buffer_size=1000)
 
 
-dir = "iris-classifiers"
 if __name__ == '__main__':
-    
     # try 1 hidden layer and 2 hidden layers with different neurons
     hidden_layer_sizes = ((2,), (5,), (10,), (5, 5), (10, 5), (10, 10), (20,20))
     for hls in hidden_layer_sizes:
         callbacks = []
         filename = str(hls) + '_hidden_layer_neurons.h5'
-        save_best_callback = tf.keras.callbacks.ModelCheckpoint(os.path.join(dir, filename), monitor='val_loss',
+        save_best_callback = tf.keras.callbacks.ModelCheckpoint(os.path.join(models_dir, filename), monitor='val_loss',
                                                                 save_best_only=True)
         callbacks.append(save_best_callback)
 
@@ -139,7 +140,7 @@ if __name__ == '__main__':
 
         # save history
         filename = str(hls) + 'history.npy'
-        np.save(os.path.join(dir, filename), hist)
+        np.save(os.path.join(models_dir, filename), hist)
 
         ## save model and weights
         # filename = str(hls)+'_hidden_layer_neurons.h5'

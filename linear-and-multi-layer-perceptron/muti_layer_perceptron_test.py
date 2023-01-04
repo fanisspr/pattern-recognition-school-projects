@@ -1,3 +1,10 @@
+'''
+The Iris data set consists of 50 samples from each of three species of Iris (Iris Setosa, Iris virginica, and Iris versicolor). 
+Four features were measured from each sample: the length and the width of the sepals and petals, in centimeters.
+Iris Setosa is the only one that is linearly seperable from the others
+
+This file can be used to load the already trained multi-layer perceptron models and test them
+'''
 import numpy as np
 import os
 import matplotlib.pyplot as plt
