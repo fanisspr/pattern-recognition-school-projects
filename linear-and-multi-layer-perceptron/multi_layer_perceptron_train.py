@@ -37,14 +37,7 @@ def plot_history(hist):
     ax.tick_params(axis='both', which='major', labelsize=15)
     plt.show()
 
-# def standardize(inputs):
-#     import copy
-#     result = copy.copy(inputs)
-#     result['features'] = tft.scale_to_z_score(inputs['features'])
-#     return result
-
 iris, iris_info = tfds.load('iris', with_info=True)
-# print(iris_info)
 
 training_size = 90
 validation_size = 30
@@ -61,11 +54,6 @@ ds_test = remaining.skip(validation_size)
 ds_train_orig = ds_train_orig.map(lambda x: (x['features'], x['label']))
 ds_valid = ds_valid.map(lambda x: (x['features'], x['label']))
 ds_test = ds_test.map(lambda x: (x['features'], x['label']))
-
-# ds_train_orig['features'] = tft.scale_to_z_score(ds_train_orig['features'])
-# ds_valid['features'] = tft.scale_to_z_score(ds_valid['features'])
-# ds_test['features'] = tft.scale_to_z_score(ds_valid['features'])
-
 
 # define hyperparameters
 num_epochs = 200

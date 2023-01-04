@@ -5,8 +5,8 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 from tensorflow import keras
 from tensorflow.keras import layers
-from Ergasia7_multi_layer_train import ds_test
-from Ergasia7_multi_layer_train import plot_history
+from multi_layer_perceptron_train import ds_test
+from multi_layer_perceptron_train import plot_history
 
 dir = "iris-classifiers"
 hidden_layer_sizes = ((2,), (5,), (10,), (5, 5), (10, 5), (10, 10), (20,20))
