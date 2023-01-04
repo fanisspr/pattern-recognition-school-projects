@@ -1,3 +1,10 @@
+'''
+The Iris data set consists of 50 samples from each of three species of Iris (Iris Setosa, Iris virginica, and Iris versicolor). 
+Four features were measured from each sample: the length and the width of the sepals and petals, in centimeters.
+Iris Setosa is the only one that is linearly seperable from the others
+
+In this project, SVM linear and non-linear classifiers are used to classify samples from the iris dataset
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -67,8 +74,29 @@ def plot_data_multi(clfs: list[svm.SVC], X: np.ndarray, y: np.ndarray, title: st
     plot_svc_decision_function(clfs[2], **params)
     plt.show()
 
-def plot_svc_decision_function(model, ax=None, plot_support=True, color='k', levels=[-1, 0, 1], linestyles=['--', '-', '--']):
-    """Plot the decision function for a 2D SVC"""
+def plot_svc_decision_function(model: svm.SVC,
+                               ax: matplotlib.axes.Axes=None,
+                               plot_support: bool=True,
+                               color: str='k',
+                               levels: list[int]=[-1, 0, 1],
+                               linestyles: list[str]=['--', '-', '--']) -> None:
+    """
+    Plot the decision function for a 2D SVC.
+    
+    Parameters:
+    ----------
+    model (SVC): A trained 2D SVC model.
+    ax (matplotlib.axes.Axes, optional): The axes object to plot on.
+        If not specified, the current axes object will be used.
+    plot_support (bool, optional): Whether to plot the support vectors.
+        Defaults to True.
+    color (str, optional): The color of the decision boundary and margins.
+        Defaults to 'k' (black).
+    levels (List[int], optional): The levels to plot the decision function.
+        Defaults to [-1, 0, 1].
+    linestyles (List[str], optional): The line styles to use for the
+        decision boundary and margins. Defaults to ['--', '-', '--'].
+    """
     if ax is None:
         ax = plt.gca()
     xlim = ax.get_xlim()
@@ -94,63 +122,40 @@ def plot_svc_decision_function(model, ax=None, plot_support=True, color='k', lev
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
-def feature_standardize(X):
-    X_norm = X
-    mu = np.zeros((1, X.shape[1]))
-    sigma = np.zeros((1, X.shape[1]))
-
-    for i in range(0, X.shape[1]):
-        mu[:, i] = np.mean(X[:, i])
-        sigma[:, i] = np.std(X[:, i])
-        X_norm[:, i] = (X[:, i] - float(mu[:, i])) / float(sigma[:, i])
-
-    return X_norm, mu, sigma
-
 
 X, y = load_iris(return_X_y=True)
-
-#Standardize data
-# (X_norm,mu,sigma) = featureStandardize(X) #standardize gives the worst results
-
-#Normalize data
-# norm = MinMaxScaler().fit(X)
-# X_norm = norm.transform(X) #normalize gives worse accuracy
-
 
 # Split data into train, test
 X_train_all = np.concatenate([X[i:(i+40), :] for i in [0,50,100]])
 X_test_all = np.concatenate([X[(i+40):(i+50), :] for i in [0,50,100]])
-# X_val = np.concatenate([X_norm[(i+40):(i+50), :] for i in [0,50,100]])
 X_train_3 = np.hstack((X_train_all[:, 0].reshape(-1,1), X_train_all[:, 1].reshape(-1,1), X_train_all[:, 3].reshape(-1,1)))
 X_test_3 = np.hstack((X_test_all[:, 0].reshape(-1,1), X_test_all[:, 1].reshape(-1,1), X_test_all[:, 3].reshape(-1,1)))
 y_train = np.concatenate([y[i:(i+40)] for i in [0,50,100]])
 y_test = np.concatenate([y[(i+40):(i+50)] for i in [0,50,100]])
-# y_val = np.concatenate([y[(i+40):(i+50)] for i in [0,50,100]])
-
 
 # Classes 1='Iris-setosa', -1 ='Iris-versicolor' or 'Iris-virginica'
 y_setosa_train = np.array([1 if i==0 else -1 for i in y_train])
 y_setosa_test = np.array([1 if i==0 else -1 for i in y_test])
-# y_setosa_val = np.array([1 if i==0 else -1 for i in y_val])
 
 # Classes 1='Iris-versicolor', -1 ='Iris-setosa' or 'Iris-virginica'
 y_versicolor_train = np.array([1 if i==1 else -1 for i in y_train])
 y_versicolor_test = np.array([1 if i==1 else -1 for i in y_test])
-# y_versicolor_val = np.array([1 if i==1 else -1 for i in y_val])
 
 # Classes 1='Iris-virginica', -1 ='Iris-versicolor' or 'Iris-setosa'
 y_virginica_train = np.array([1 if i==2 else -1 for i in y_train])
 y_virginica_test = np.array([1 if i==2 else -1 for i in y_test])
-# y_virginica_val = np.array([1 if i==2 else -1 for i in y_val])
-
 
 
 for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3, X_test_all], ["(1, 2, 4)", "(1, 2, 3, 4)"]):
     print("======================================================")
     print("Using characteristics {}:\n". format(characteristics))
 
+    '''
+    2 classes problem (Versicolor vs others):
+    '''
+
     """ 
-    A
+    - Classify data using a linear SVM.
     """
     print("A")
     print("Classifying with linear SVM:\n")
@@ -158,7 +163,6 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     C = 100
     # Linear SVM
     lin_clf = svm.SVC(kernel='linear', C=C)
-    # lin_clf.fit(X_train, y_setosa_train)
     lin_clf.fit(X_train, y_versicolor_train)
 
 
@@ -169,21 +173,15 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     print("\tValidation accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
     accuracy = lin_clf.score(X_test, y_versicolor_test)
     print('\tTesting accuracy: {0:.2f}'.format(accuracy))
-    #Alternative ways:
-    # y_setosa_pred = lin_clf.predict(X_test)
-    # accuracy = accuracy_score(y_setosa_test, y_setosa_pred)
-    # accuracy = np.mean(p==y)*100
-
 
     # linear SVM for 2D plotting
     clf = svm.SVC(kernel='linear', C=C)
     clf.fit(X_train[:,:2], y_versicolor_train)
-    # print(clf.decision_function(X_train))
     plot_data(clf, X_train, y_versicolor_train, title='Linear kernel SVM')
 
 
     """ 
-    B 
+    - Classify data using non-linear SVMs.    
     """
     print("\nB")
     print("Classifying with various non-linear SVMs:\n")
@@ -220,12 +218,15 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
 
     for clf, title in zip(models, titles):
         clf.fit(X_train[:, :2], y_versicolor_train)
-        # print(clf.decision_function(X_train))
         plot_data(clf, X_train, y_versicolor_train, title=title)
 
 
+    '''
+    3 classes problem:
+    '''
+
     """ 
-    C
+    - Classify data using a linear SVM.    
     """
     print("\nC")
     print("Multi-class classification with linear SVM:\n")
@@ -251,7 +252,7 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     plot_data_multi(clfs, X_train, y_train, title='3 Linear kernel SVMs')
 
     """ 
-    D
+    - Classify data using non-linear SVMs.   
     """
     print("\nD")
     print("Multi-class classification with various non-linear SVMs:\n")
