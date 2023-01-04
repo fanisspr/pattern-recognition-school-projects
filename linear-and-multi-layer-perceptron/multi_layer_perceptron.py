@@ -1,3 +1,10 @@
+'''
+The Iris data set consists of 50 samples from each of three species of Iris (Iris Setosa, Iris virginica, and Iris versicolor). 
+Four features were measured from each sample: the length and the width of the sepals and petals, in centimeters.
+Iris Setosa is the only one that is linearly seperable from the others
+
+In this project, a multi-layer perceptron is used to classify samples from the iris dataset
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -8,17 +15,37 @@ from tensorflow.keras import layers
 import os
 
 
-def multi_layer_Perceptron(input_shape=(4, ), hidden_layer_sizes=(2, )):
+def multi_layer_Perceptron(input_shape: tuple[int]=(4,), 
+                            hidden_layer_sizes: tuple[int]=(2,)) -> keras.Model:
+    """
+    Create a multi-layer perceptron model.
+
+    Parameters:
+    input_shape: tuple of int, the shape of the input layer
+    hidden_layer_sizes: tuple of int, the sizes of the hidden layers
+
+    Returns:
+    model: a Keras model with the specified architecture
+    """
     model = keras.Sequential()
     model.add(keras.Input(shape=input_shape))
     for i, h in enumerate(hidden_layer_sizes):
         model.add(layers.Dense(h, activation='sigmoid', name='hidden_layer_'+str(i)))
     model.add(layers.Dense(3, activation='softmax', name='output_layer'))
     model.summary()
-
     return model
 
-def plot_history(hist):
+def plot_history(hist: dict[str, list[float]]):
+    """
+    Plots the history of the training and validation loss and accuracy for a Keras model.
+
+    Parameters:
+    hist: A dictionary with keys 'loss', 'val_loss', 'accuracy', and 'val_accuracy' containing the
+            training and validation loss and accuracy values for each epoch.
+
+    Returns:
+    None. The function plots the history using matplotlib.
+    """
     fig = plt.figure(figsize=(12,5))
     ax = fig.add_subplot(1, 2, 1)
     ax.plot(hist['loss'], lw=3)
@@ -76,7 +103,8 @@ ds_valid = ds_valid.prefetch(buffer_size=1000)
 
 dir = "iris-classifiers"
 if __name__ == '__main__':
-
+    
+    # try 1 hidden layer and 2 hidden layers with different neurons
     hidden_layer_sizes = ((2,), (5,), (10,), (5, 5), (10, 5), (10, 10), (20,20))
     for hls in hidden_layer_sizes:
         callbacks = []
