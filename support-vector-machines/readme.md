@@ -40,6 +40,7 @@ By using all 4 of the features, the training and validation accuracy is further 
 Using features (1, 2, 4):
 
 A
+
 Classifying with linear SVM:
 
         Training accuracy: 0.74
@@ -47,26 +48,35 @@ Classifying with linear SVM:
         Testing accuracy: 0.73
 
 B
+
 Classifying with various non-linear SVMs:
 
 SVM with polynomial kernel of degree 2
+
         Training accuracy: 0.96
         Validation accuracy: 0.96 (+/- 0.13)
         Testing accuracy: 0.97
+
 SVM with polynomial kernel of degree 3
+
         Training accuracy: 0.93
         Validation accuracy: 0.93 (+/- 0.13)
         Testing accuracy: 0.97
+
 SVM with polynomial kernel of degree 4
+
         Training accuracy: 0.95
         Validation accuracy: 0.92 (+/- 0.16)
         Testing accuracy: 0.97
+
 SVM with RBF kernel
+
         Training accuracy: 0.96
         Validation accuracy: 0.92 (+/- 0.11)
         Testing accuracy: 1.00
 
 C
+
 Multi-class classification with linear SVM:
 
         Training accuracy: 0.93
@@ -74,28 +84,38 @@ Multi-class classification with linear SVM:
         Testing accuracy: 1.00
 
 D
+
 Multi-class classification with various non-linear SVMs:
 
 3 SVMs with polynomial kernel of degree 2
+
         Training accuracy: 0.94
         Validation accuracy: 0.93 (+/- 0.08)
         Testing accuracy: 1.00
+
 3 SVMs with polynomial kernel of degree 3
+
         Training accuracy: 0.94
         Validation accuracy: 0.93 (+/- 0.08)
         Testing accuracy: 1.00
+
 3 SVMs with polynomial kernel of degree 4
+
         Training accuracy: 0.95
         Validation accuracy: 0.93 (+/- 0.08)
         Testing accuracy: 1.00
+
 3 SVMs with RBF kernel
+
         Training accuracy: 0.96
         Validation accuracy: 0.95 (+/- 0.08)
         Testing accuracy: 1.00
-======================================================
+
+---
 Using features (1, 2, 3, 4):
 
 A
+
 Classifying with linear SVM:
 
         Training accuracy: 0.75
@@ -103,26 +123,35 @@ Classifying with linear SVM:
         Testing accuracy: 0.77
 
 B
+
 Classifying with various non-linear SVMs:
 
 SVM with polynomial kernel of degree 2
+
         Training accuracy: 0.97
         Validation accuracy: 0.93 (+/- 0.17)
         Testing accuracy: 0.97
+
 SVM with polynomial kernel of degree 3
+
         Training accuracy: 0.97
         Validation accuracy: 0.92 (+/- 0.19)
         Testing accuracy: 0.97
+
 SVM with polynomial kernel of degree 4
+
         Training accuracy: 0.99
         Validation accuracy: 0.91 (+/- 0.21)
         Testing accuracy: 0.97
+
 SVM with RBF kernel
+
         Training accuracy: 0.97
         Validation accuracy: 0.93 (+/- 0.16)
         Testing accuracy: 1.00
 
 C
+
 Multi-class classification with linear SVM:
 
         Training accuracy: 0.97
@@ -130,21 +159,29 @@ Multi-class classification with linear SVM:
         Testing accuracy: 1.00
 
 D
+
 Multi-class classification with various non-linear SVMs:
 
 3 SVMs with polynomial kernel of degree 2
+
         Training accuracy: 0.97
         Validation accuracy: 0.97 (+/- 0.07)
         Testing accuracy: 1.00
+
 3 SVMs with polynomial kernel of degree 3
+
         Training accuracy: 0.97
         Validation accuracy: 0.97 (+/- 0.06)
         Testing accuracy: 1.00
+
 3 SVMs with polynomial kernel of degree 4
+
         Training accuracy: 0.98
         Validation accuracy: 0.94 (+/- 0.07)
         Testing accuracy: 1.00
+
 3 SVMs with RBF kernel
+
         Training accuracy: 0.98
         Validation accuracy: 0.96 (+/- 0.09)
         Testing accuracy: 1.00
