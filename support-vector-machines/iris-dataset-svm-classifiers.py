@@ -7,8 +7,23 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import MinMaxScaler
 
-def plotData(clf, X, y, title, **params):
-    """Plot the points of 2 classes and the decision function"""
+def plot_data(clf: svm.SVC, X: np.ndarray, y: np.ndarray, title: str, **params):
+    '''
+    create a scatter plot of data points with two classes, 
+    and plot the decision function of a classifier.
+
+    Parameters:
+    ----------
+    clf: sklearn.svm.SVC
+        a classifier object with a fit(X, y) and predict(X) method
+    X: ndarray
+        feature matrix with shape (n_samples, n_features)
+    y: ndarray
+        true labels with shape (n_samples,)
+    title: str
+        title of the plot
+    params: additional parameters to pass to plot_svc_decision_function
+    '''
     pos = y == 1
     neg = y == -1
     plt.figure()
@@ -20,9 +35,23 @@ def plotData(clf, X, y, title, **params):
     plot_svc_decision_function(clf, **params)
     plt.show()
 
-def plotData_multi(clfs, X, y, title, **params):
-    """Plot the points of all 3 classes and the 3 decision functions
-        that seperate each class from the others (one-vs-all stratregy)"""
+def plot_data_multi(clfs: list[svm.SVC], X: np.ndarray, y: np.ndarray, title: str, **params):
+    """
+    create a scatter plot of data points of all 3 classes, 
+    and plot the 3 decision functions that seperate each class from the others (one-vs-all stratregy)
+
+    Parameters:
+    ----------
+    clf: list[sklearn.svm.SVC]
+        a list of classifier objects with a fit(X, y) and predict(X) method
+    X: ndarray
+        feature matrix with shape (n_samples, n_features)
+    y: ndarray
+        true labels with shape (n_samples,)
+    title: str
+        title of the plot
+    params: additional parameters to pass to plot_svc_decision_function
+    """
     zero = y == 0
     one = y == 1
     two = y == 2
@@ -65,7 +94,7 @@ def plot_svc_decision_function(model, ax=None, plot_support=True, color='k', lev
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
-def featureStandardize(X):
+def feature_standardize(X):
     X_norm = X
     mu = np.zeros((1, X.shape[1]))
     sigma = np.zeros((1, X.shape[1]))
@@ -150,7 +179,7 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     clf = svm.SVC(kernel='linear', C=C)
     clf.fit(X_train[:,:2], y_versicolor_train)
     # print(clf.decision_function(X_train))
-    plotData(clf, X_train, y_versicolor_train, title='Linear kernel SVM')
+    plot_data(clf, X_train, y_versicolor_train, title='Linear kernel SVM')
 
 
     """ 
@@ -192,7 +221,7 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     for clf, title in zip(models, titles):
         clf.fit(X_train[:, :2], y_versicolor_train)
         # print(clf.decision_function(X_train))
-        plotData(clf, X_train, y_versicolor_train, title=title)
+        plot_data(clf, X_train, y_versicolor_train, title=title)
 
 
     """ 
@@ -219,7 +248,7 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     clf_versic = svm.SVC(kernel='linear', C=C).fit(X_train[:,:2], y_versicolor_train)
     clf_virgin = svm.SVC(kernel='linear', C=C).fit(X_train[:,:2], y_virginica_train)
     clfs = [clf_setosa, clf_versic, clf_virgin]
-    plotData_multi(clfs, X_train, y_train, title='3 Linear kernel SVMs')
+    plot_data_multi(clfs, X_train, y_train, title='3 Linear kernel SVMs')
 
     """ 
     D
@@ -262,4 +291,4 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
         clf_versic = eval(clf).fit(X_train[:, :2], y_versicolor_train)
         clf_virgin = eval(clf).fit(X_train[:, :2], y_virginica_train)
         clfs = [clf_setosa, clf_versic, clf_virgin]
-        plotData_multi(clfs, X_train, y_train, title=title, levels=[0], linestyles=['-'])
+        plot_data_multi(clfs, X_train, y_train, title=title, levels=[0], linestyles=['-'])
