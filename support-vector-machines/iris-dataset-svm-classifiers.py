@@ -5,6 +5,7 @@ Iris Setosa is the only one that is linearly seperable from the others
 
 In this project, SVM linear and non-linear classifiers are used to classify samples from the iris dataset
 '''
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,7 +15,14 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import MinMaxScaler
 
-def plot_data(clf: svm.SVC, X: np.ndarray, y: np.ndarray, title: str, **params):
+
+root_dir = os.path.relpath(os.path.dirname(__file__))
+plots_dir = os.path.join(root_dir, 'plots')
+if not os.path.exists(plots_dir):
+    os.mkdir(plots_dir)
+
+
+def plot_data(clf: svm.SVC, X: np.ndarray, y: np.ndarray, title: str, **kwargs):
     '''
     create a scatter plot of data points with two classes, 
     and plot the decision function of a classifier.
@@ -29,7 +37,7 @@ def plot_data(clf: svm.SVC, X: np.ndarray, y: np.ndarray, title: str, **params):
         true labels with shape (n_samples,)
     title: str
         title of the plot
-    params: additional parameters to pass to plot_svc_decision_function
+    kwargs: additional parameters
     '''
     pos = y == 1
     neg = y == -1
@@ -37,12 +45,15 @@ def plot_data(clf: svm.SVC, X: np.ndarray, y: np.ndarray, title: str, **params):
     plt.title(title)
     plt.xlabel('sepal length')
     plt.ylabel('sepal width')
-    plt.plot(X[pos, 0], X[pos, 1], 'bo')
-    plt.plot(X[neg, 0], X[neg, 1], 'ro')
-    plot_svc_decision_function(clf, **params)
+    plt.plot(X[pos, 0], X[pos, 1], 'bo', label=kwargs.get('first_class_label', None))
+    plt.plot(X[neg, 0], X[neg, 1], 'ro', label=kwargs.get('second_class_label', None))
+    plot_svc_decision_function(clf, **kwargs)
+    plt.legend()
+    if kwargs.get('save_to_file', None):
+        plt.savefig(os.path.join(plots_dir, kwargs.get('save_to_file')))
     plt.show()
 
-def plot_data_multi(clfs: list[svm.SVC], X: np.ndarray, y: np.ndarray, title: str, **params):
+def plot_data_multi(clfs: list[svm.SVC], X: np.ndarray, y: np.ndarray, title: str, **kwargs):
     """
     create a scatter plot of data points of all 3 classes, 
     and plot the 3 decision functions that seperate each class from the others (one-vs-all stratregy)
@@ -57,7 +68,7 @@ def plot_data_multi(clfs: list[svm.SVC], X: np.ndarray, y: np.ndarray, title: st
         true labels with shape (n_samples,)
     title: str
         title of the plot
-    params: additional parameters to pass to plot_svc_decision_function
+    kwargs: additional parameters to pass
     """
     zero = y == 0
     one = y == 1
@@ -66,20 +77,24 @@ def plot_data_multi(clfs: list[svm.SVC], X: np.ndarray, y: np.ndarray, title: st
     plt.title(title)
     plt.xlabel('sepal length')
     plt.ylabel('sepal width')
-    plt.plot(X[zero, 0], X[zero, 1], 'bo')
-    plt.plot(X[one, 0], X[one, 1], 'ro')
-    plt.plot(X[two, 0], X[two, 1], 'ko')
-    plot_svc_decision_function(clfs[0], color='b', **params)
-    plot_svc_decision_function(clfs[1], color='r', **params)
-    plot_svc_decision_function(clfs[2], **params)
+    plt.plot(X[zero, 0], X[zero, 1], 'bo', label=kwargs.get('first_class_label', None))
+    plt.plot(X[one, 0], X[one, 1], 'ro', label=kwargs.get('second_class_label', None))
+    plt.plot(X[two, 0], X[two, 1], 'ko', label=kwargs.get('third_class_label', None))
+    plot_svc_decision_function(clfs[0], color='b', **kwargs)
+    plot_svc_decision_function(clfs[1], color='r', **kwargs)
+    plot_svc_decision_function(clfs[2], **kwargs)
+    plt.legend()
+    if kwargs.get('save_to_file', None):
+        plt.savefig(os.path.join(plots_dir, kwargs.get('save_to_file')))
     plt.show()
 
 def plot_svc_decision_function(model: svm.SVC,
-                               ax: matplotlib.axes.Axes=None,
+                               ax=None,
                                plot_support: bool=True,
                                color: str='k',
                                levels: list[int]=[-1, 0, 1],
-                               linestyles: list[str]=['--', '-', '--']) -> None:
+                               linestyles: list[str]=['--', '-', '--'],
+                               **kwargs) -> None:
     """
     Plot the decision function for a 2D SVC.
     
@@ -146,9 +161,9 @@ y_virginica_train = np.array([1 if i==2 else -1 for i in y_train])
 y_virginica_test = np.array([1 if i==2 else -1 for i in y_test])
 
 
-for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3, X_test_all], ["(1, 2, 4)", "(1, 2, 3, 4)"]):
+for X_train, X_test, features in zip([X_train_3, X_train_all], [X_test_3, X_test_all], ["(1, 2, 4)", "(1, 2, 3, 4)"]):
     print("======================================================")
-    print("Using characteristics {}:\n". format(characteristics))
+    print("Using features {}:\n". format(features))
 
     '''
     2 classes problem (Versicolor vs others):
@@ -177,8 +192,13 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     # linear SVM for 2D plotting
     clf = svm.SVC(kernel='linear', C=C)
     clf.fit(X_train[:,:2], y_versicolor_train)
-    plot_data(clf, X_train, y_versicolor_train, title='Linear kernel SVM')
-
+    plot_data(clf, 
+                X_train, 
+                y_versicolor_train, 
+                title='Linear kernel SVM',
+                first_class_label='Iris Versicolor',
+                second_class_label='Other classes',
+                save_to_file='linear-svm.png')
 
     """ 
     - Classify data using non-linear SVMs.    
@@ -218,7 +238,13 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
 
     for clf, title in zip(models, titles):
         clf.fit(X_train[:, :2], y_versicolor_train)
-        plot_data(clf, X_train, y_versicolor_train, title=title)
+        plot_data(clf, 
+                    X_train, 
+                    y_versicolor_train, 
+                    title=title,
+                    first_class_label='Iris Versicolor',
+                    second_class_label='Other classes',
+                    save_to_file=title)
 
 
     '''
@@ -249,7 +275,14 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
     clf_versic = svm.SVC(kernel='linear', C=C).fit(X_train[:,:2], y_versicolor_train)
     clf_virgin = svm.SVC(kernel='linear', C=C).fit(X_train[:,:2], y_virginica_train)
     clfs = [clf_setosa, clf_versic, clf_virgin]
-    plot_data_multi(clfs, X_train, y_train, title='3 Linear kernel SVMs')
+    plot_data_multi(clfs, 
+                    X_train, 
+                    y_train, 
+                    title='3 Linear kernel SVMs',
+                    first_class_label='Iris Setosa',
+                    second_class_label='Iris Versicolor',
+                    third_class_label='Iris Virginica',
+                    save_to_file='3-linear-svms')
 
     """ 
     - Classify data using non-linear SVMs.   
@@ -292,4 +325,13 @@ for X_train, X_test, characteristics in zip([X_train_3, X_train_all], [X_test_3,
         clf_versic = eval(clf).fit(X_train[:, :2], y_versicolor_train)
         clf_virgin = eval(clf).fit(X_train[:, :2], y_virginica_train)
         clfs = [clf_setosa, clf_versic, clf_virgin]
-        plot_data_multi(clfs, X_train, y_train, title=title, levels=[0], linestyles=['-'])
+        plot_data_multi(clfs, 
+                        X_train, 
+                        y_train, 
+                        title=title, 
+                        first_class_label='Iris Setosa',
+                        second_class_label='Iris Versicolor',
+                        third_class_label='Iris Virginica',
+                        save_to_file=title,
+                        levels=[0], 
+                        linestyles=['-'])
