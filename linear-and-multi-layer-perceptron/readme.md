@@ -30,25 +30,25 @@ In general, for a particular dataset, an ideal number of neurons must be found i
 underfit nor overfit the data.
 
 Test metrics for model with hidden layer sizes (2,):
-    Test loss: 0.0916, Test Acc.: 0.9667
+        Test loss: 0.0916, Test Acc.: 0.9667
 
 Test metrics for model with hidden layer sizes (5,):
-    Test loss: 0.0803 Test Acc.: 0.9667
+        Test loss: 0.0803 Test Acc.: 0.9667
 
 Test metrics for model with hidden layer sizes (10,):
-    Test loss: 0.0655 Test Acc.: 0.9667
+        Test loss: 0.0655 Test Acc.: 0.9667
 
 Test metrics for model with hidden layer sizes (5, 5):
-    Test loss: 0.0677 Test Acc.: 0.9667    
+        Test loss: 0.0677 Test Acc.: 0.9667    
 
 Test metrics for model with hidden layer sizes (10, 5):
-    Test loss: 0.0616 Test Acc.: 0.9667    
+        Test loss: 0.0616 Test Acc.: 0.9667    
 
 Test metrics for model with hidden layer sizes (10, 10):
-    Test loss: 0.0971 Test Acc.: 0.9667    
+        Test loss: 0.0971 Test Acc.: 0.9667    
 
 Test metrics for model with hidden layer sizes (20, 20):
-    Test loss: 0.0730 Test Acc.: 0.9667  
+        Test loss: 0.0730 Test Acc.: 0.9667  
 
 # Iris dataset
 The Iris data set consists of 50 samples from each of three species of Iris (Iris Setosa, Iris virginica, and Iris versicolor). 
