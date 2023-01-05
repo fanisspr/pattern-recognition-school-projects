@@ -1,3 +1,6 @@
+'''
+Clustering methods for classifying samples from Iris dataset
+'''
 import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
@@ -57,8 +60,6 @@ X = sc.transform(X)
 
 """
 K-Means
-κάθε iteration οδηγει σε διαφορετικη ομαδοποιηση, λογω της τυχαιας αρχικοποιησης των κεντρων.
-οποτε η αρχικοποιηση παιζει σημαντικο ρολο
 """
 
 # This will perform ten runs of the k-means algorithm on the data with a maximum of 100 iterations per run:
@@ -77,9 +78,7 @@ print("K-means:")
 print(" Error: {0:.4f}%".format(error))
 
 """ 
-fuzzy C-means. 
-Introduces Membership fucntion: Probability of a point to belong to a cluster
-fuzzifier (m). If m = 1 => knn
+fuzzy C-means
 """
 
 fcmeans = FCM(n_clusters=3,
@@ -111,6 +110,5 @@ print("   Error: {0:.4f}%".format(error))
 
 """
 ISODATA
-clusters με ανομοια δεδομενα διαρουνται και clusters με ομοια ενωνονται.
 clusters are split if standard deviation is big(data not similar) and merged if std is small (similar data)
 """
