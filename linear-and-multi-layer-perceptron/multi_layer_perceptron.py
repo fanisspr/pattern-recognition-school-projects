@@ -18,6 +18,9 @@ root_dir = os.path.relpath(os.path.dirname(__file__))
 models_dir = os.path.join(root_dir, 'models-and-history')
 if not os.path.exists(models_dir):
     os.mkdir(models_dir)
+plots_dir = os.path.join(root_dir, 'plots')
+if not os.path.exists(plots_dir):    
+    os.mkdir(plots_dir)
 
 
 def multi_layer_Perceptron(input_shape: tuple[int]=(4,), 
@@ -40,14 +43,16 @@ def multi_layer_Perceptron(input_shape: tuple[int]=(4,),
     model.summary()
     return model
 
-def plot_history(hist: dict[str, list[float]]):
+def plot_history(hist: dict[str, list[float]], filepath: str, title: str):
     """
     Plots the history of the training and validation loss and accuracy for a Keras model.
 
     Parameters:
     hist: A dictionary with keys 'loss', 'val_loss', 'accuracy', and 'val_accuracy' containing the
             training and validation loss and accuracy values for each epoch.
-
+    filepath: A string with the path to save the plot at
+    title: A string with the title for the plots
+    
     Returns:
     None. The function plots the history using matplotlib.
     """
@@ -65,6 +70,9 @@ def plot_history(hist: dict[str, list[float]]):
     plt.legend(['Train Acc.', 'Validation Acc.'], fontsize=15)
     ax.set_xlabel('Epochs', size=15)
     ax.tick_params(axis='both', which='major', labelsize=15)
+    plt.title(title)
+    fig.savefig(filepath)
+    plt.show()
     plt.show()
 
 iris, iris_info = tfds.load('iris', with_info=True)
@@ -136,7 +144,9 @@ if __name__ == '__main__':
 
         #plot metrics
         hist = history.history
-        plot_history(hist)
+        plot_history(hist, 
+                     filepath=os.path.join(plots_dir, f'{hls}-model-plot.png'), 
+                     title=f'History of model with hidden layer sizes {hls}')
 
         # save history
         filename = str(hls) + 'history.npy'
