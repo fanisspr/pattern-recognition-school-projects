@@ -6,17 +6,25 @@ from fcmeans import FCM #fuzzy-c-means package
 import isodata
 
 
-def accuracy(cluster_labels, class_labels):
+def accuracy(cluster_labels: list[int], class_labels: list[str]) -> float:
+    """
+    Calculate the accuracy of a clustering algorithm on the Iris dataset.
+    
+    Parameters:
+    cluster_labels: list[int] 
+        The cluster labels predicted by the algorithm.
+    class_labels: list[str]
+        The true class labels for the samples.
+    
+    Returns:
+    float: The accuracy of the algorithm, ranging from 0 to 100.
+    """
     correct_pred = 0
-    # print(cluster_labels)
     cluster_labels = list(cluster_labels)
-    #each class gets a number(0,1,2) based on how many points has this number as a label
+    # each class gets a number(0,1,2) based on how many points has this number as a label
     seto = max(set(cluster_labels[0:50]), key=cluster_labels[0:50].count)
     vers = max(set(cluster_labels[50:100]), key=cluster_labels[50:100].count)
     virg = max(set(cluster_labels[100:]), key=cluster_labels[100:].count)
-    # print(seto)
-    # print(vers)
-    # print(virg)
     for i in range(len(X)):
         if cluster_labels[i] == seto and class_labels[i] == 'Iris-setosa':
             correct_pred = correct_pred + 1
@@ -53,7 +61,7 @@ K-Means
 οποτε η αρχικοποιηση παιζει σημαντικο ρολο
 """
 
-# This will perform ten runs of the k-means algorithm on the data with a maximum of 300 iterations per run:
+# This will perform ten runs of the k-means algorithm on the data with a maximum of 100 iterations per run:
 kmeans = KMeans(init="random",
                 n_clusters=3,
                 n_init=10,
